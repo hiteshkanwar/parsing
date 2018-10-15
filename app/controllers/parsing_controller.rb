@@ -7,10 +7,11 @@ class ParsingController < ApplicationController
 
   end
 
+
   def arrivals
     begin
       # OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
-      doc = Nokogiri::HTML open("https://www.cph.dk/en/flight-information/arrivals")
+      doc = Nokogiri::HTML open(arrivals__url)
       css = doc.css('div.flights__table div.stylish-table__row  div.stylish-table__cell')
 
       @arrivals = []
@@ -40,10 +41,21 @@ class ParsingController < ApplicationController
 
   end
 
+  def arrivals__url
+    date = params[:date].split('-')[0]+" - "+ params[:date].split('-')[1]+" - "+params[:date].split('-')[2]
+    return "https://www.cph.dk/en/flight-information/arrivals?q="+params[:q]+"&date="+date+"&time="+params[:time]+""
+  end
+
+  def departures__url
+    date = params[:date].split('-')[0]+" - "+ params[:date].split('-')[1]+" - "+params[:date].split('-')[2]
+    return "https://www.cph.dk/en/flight-information/departures?q="+params[:q]+"&date="+date+"&time="+params[:time]
+  end
+
+
   def departures
     begin
       # OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
-      doc = Nokogiri::HTML open("https://www.cph.dk/en/flight-information/departures")
+      doc = Nokogiri::HTML open(departures__url)
       css = doc.css('div.flights__table div.stylish-table__row  div.stylish-table__cell')
 
       @departures = []
@@ -63,7 +75,8 @@ class ParsingController < ApplicationController
           @departure_hash = {}  if (index-7)%8 == 0       
         end
       end
-
+      @departures = @departures.select{|k| k["Airline"] == params[:q]} if params[:q].present?
+      @departures = @departures.select{|k| k["Tid"] >= params[:t]} if params[:t].present? 
       render :json => {:departures => @departures}
 
     rescue => e
