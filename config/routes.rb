@@ -8,4 +8,11 @@ Rails.application.routes.draw do
   
   root to: 'parsing#index'
   # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
+
+  namespace :api, defaults: { format: :json } do
+    namespace :v1 do
+      match 'arrivals', to: 'parsing#arrivals', via: [:get, :post]
+      match 'departures', to: 'parsing#departures', via: [:get, :post]
+    end
+  end
 end

@@ -3,9 +3,7 @@ class ParsingController < ApplicationController
   require 'nokogiri'
   require 'openssl'
 
-  def index	
-
-  end
+  def index;end
 
 
   def arrivals
@@ -15,10 +13,10 @@ class ParsingController < ApplicationController
       css = doc.css('div.flights__table div.stylish-table__row  div.stylish-table__cell')
 
       @arrivals = []
-      @arrival_hash = {} 
+      @arrival_hash = {}
 
       css.each_with_index do |title, index|
-        if index > 7 
+        if index > 7
           @arrival_hash["Tid"] = title.text.strip if index%8 == 0
           @arrival_hash["Expected"] =  title.text.strip if (index-1)%8 == 0
           @arrival_hash["Airline"] =  title.text.strip if (index-2)%8 == 0
@@ -28,7 +26,7 @@ class ParsingController < ApplicationController
           @arrival_hash["Status"] =  title.text.strip if (index-6)%8 == 0
           @arrival_hash["Updates"] =  title.text.strip if (index-7)%8 == 0
           @arrivals.push(@arrival_hash) if (index-7)%8 == 0
-          @arrival_hash = {}  if (index-7)%8 == 0       
+          @arrival_hash = {}  if (index-7)%8 == 0
         end
       end
      render :json => {:arrivals => @arrivals}
@@ -59,10 +57,10 @@ class ParsingController < ApplicationController
       css = doc.css('div.flights__table div.stylish-table__row  div.stylish-table__cell')
 
       @departures = []
-      @departure_hash = {} 
+      @departure_hash = {}
 
       css.each_with_index do |title, index|
-        if index > 7 
+        if index > 7
           @departure_hash["Tid"] = title.text.strip if index%8 == 0
           @departure_hash["Expected"] =  title.text.strip if (index-1)%8 == 0
           @departure_hash["Airline"] =  title.text.strip if (index-2)%8 == 0
@@ -72,11 +70,11 @@ class ParsingController < ApplicationController
           @departure_hash["Status"] =  title.text.strip if (index-6)%8 == 0
           @departure_hash["Updates"] =  title.text.strip if (index-7)%8 == 0
           @departures.push(@departure_hash) if (index-7)%8 == 0
-          @departure_hash = {}  if (index-7)%8 == 0       
+          @departure_hash = {}  if (index-7)%8 == 0
         end
       end
       @departures = @departures.select{|k| k["Airline"] == params[:q]} if params[:q].present?
-      @departures = @departures.select{|k| k["Tid"] >= params[:t]} if params[:t].present? 
+      @departures = @departures.select{|k| k["Tid"] >= params[:t]} if params[:t].present?
       render :json => {:departures => @departures}
 
     rescue => e
@@ -84,8 +82,6 @@ class ParsingController < ApplicationController
       puts e.io.status # Http Error code
       puts e.io.readlines # Http response body
     end
-
-
   end
 
 end
