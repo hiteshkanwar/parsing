@@ -28,12 +28,13 @@ class Api::V1::ParsingController < ApplicationController
         end
       end
 
-      render :json => {:arrivals => @arrivals}
+      render :json => { arrivals: @arrivals }
 
     rescue => e
-      puts e # Error message
-      puts e.io.status # Http Error code
-      puts e.io.readlines # Http response body
+      puts e.to_s # Error message
+      # puts e.io.status # Http Error code
+      # puts e.io.readlines # Http response body
+      render :json => { arrivals: [], error: e.to_s }
     end
   end
 
@@ -69,12 +70,13 @@ class Api::V1::ParsingController < ApplicationController
 
       @departures = @departures.select{|k| k["Airline"] == params[:q]} if params[:q].present?
       @departures = @departures.select{|k| k["Tid"] >= params[:t]} if params[:t].present? 
-      render :json => {:departures => @departures}
+      render :json => { departures: @departures }
 
     rescue => e
-      puts e # Error message
-      puts e.io.status # Http Error code
-      puts e.io.readlines # Http response body
+      puts e.to_s # Error message
+      # puts e.io.status # Http Error code
+      # puts e.io.readlines # Http response body
+      render :json => { departures: [], error: e.to_s }
     end
   end
 

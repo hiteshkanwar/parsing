@@ -10,32 +10,33 @@ class ParsingController < ApplicationController
       # OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
       doc = Nokogiri::HTML open(arrivals__url)
       css = doc.css('div.flights__table div.stylish-table__row  div.stylish-table__cell')
+      tags = ["Tid", "Expected", "Airline", "Arriving from", "Gate", "Terminal", "Status", "Updates"]
 
+      i = 0
       @arrivals = []
       @arrival_hash = {}
-
+      
       css.each_with_index do |title, index|
         if index > 7
-          @arrival_hash["Tid"] = title.text.strip if index%8 == 0
-          @arrival_hash["Expected"] =  title.text.strip if (index-1)%8 == 0
-          @arrival_hash["Airline"] =  title.text.strip if (index-2)%8 == 0
-          @arrival_hash["Arriving from"] =  title.text.strip if (index-3)%8 == 0
-          @arrival_hash["Gate"] =  title.text.strip if (index-4)%8 == 0
-          @arrival_hash["Terminal"] =  title.text.strip if (index-5)%8 == 0
-          @arrival_hash["Status"] =  title.text.strip if (index-6)%8 == 0
-          @arrival_hash["Updates"] =  title.text.strip if (index-7)%8 == 0
-          @arrivals.push(@arrival_hash) if (index-7)%8 == 0
-          @arrival_hash = {}  if (index-7)%8 == 0
+          @arrival_hash[tags[i]] = title.text.strip if (index - i)%8 == 0
+
+          if (index-7)%8 == 0
+            @arrivals.push(@arrival_hash)
+            @arrival_hash = {}
+            i = 0
+          else
+            i += 1
+          end
         end
       end
-     render :json => {:arrivals => @arrivals}
 
+      render :json => { arrivals: @arrivals }
     rescue => e
-      puts e # Error message
-      puts e.io.status # Http Error code
-      puts e.io.readlines # Http response body
+      puts e.to_s # Error message
+      # puts e.io.status # Http Error code
+      # puts e.io.readlines # Http response body
+      render :json => { arrivals: [], error: e.to_s }
     end
-
   end
 
   def arrivals__url
@@ -53,32 +54,35 @@ class ParsingController < ApplicationController
       # OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
       doc = Nokogiri::HTML open(departures__url)
       css = doc.css('div.flights__table div.stylish-table__row  div.stylish-table__cell')
+      tags = ["Tid", "Expected", "Airline", "Destination", "Gate", "Terminal", "Status", "Updates"]
 
+      i = 0
       @departures = []
       @departure_hash = {}
 
       css.each_with_index do |title, index|
         if index > 7
-          @departure_hash["Tid"] = title.text.strip if index%8 == 0
-          @departure_hash["Expected"] =  title.text.strip if (index-1)%8 == 0
-          @departure_hash["Airline"] =  title.text.strip if (index-2)%8 == 0
-          @departure_hash["Destination"] =  title.text.strip if (index-3)%8 == 0
-          @departure_hash["Gate"] =  title.text.strip if (index-4)%8 == 0
-          @departure_hash["Terminal"] =  title.text.strip if (index-5)%8 == 0
-          @departure_hash["Status"] =  title.text.strip if (index-6)%8 == 0
-          @departure_hash["Updates"] =  title.text.strip if (index-7)%8 == 0
-          @departures.push(@departure_hash) if (index-7)%8 == 0
-          @departure_hash = {}  if (index-7)%8 == 0
+          @departure_hash[tags[i]] = title.text.strip if (index - i)%8 == 0
+
+          if (index-7)%8 == 0
+            @departures.push(@departure_hash)
+            @departure_hash = {}
+            i = 0
+          else
+            i += 1
+          end
         end
       end
+
       @departures = @departures.select{|k| k["Airline"] == params[:q]} if params[:q].present?
-      @departures = @departures.select{|k| k["Tid"] >= params[:t]} if params[:t].present?
-      render :json => {:departures => @departures}
+      @departures = @departures.select{|k| k["Tid"] >= params[:t]} if params[:t].present? 
+      render :json => { departures: @departures }
 
     rescue => e
       puts e # Error message
-      puts e.io.status # Http Error code
-      puts e.io.readlines # Http response body
+      # puts e.io.status # Http Error code
+      # puts e.io.readlines # Http response body
+      render :json => { departures: [], error: e.to_s }
     end
   end
 
