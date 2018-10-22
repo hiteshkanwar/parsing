@@ -5,7 +5,6 @@ class ParsingController < ApplicationController
 
   def index;end
 
-
   def arrivals
     begin
       # OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
@@ -48,7 +47,6 @@ class ParsingController < ApplicationController
     date = params[:date].split('-')[0]+" - "+ params[:date].split('-')[1]+" - "+params[:date].split('-')[2]
     return "https://www.cph.dk/en/flight-information/departures?q="+params[:q]+"&date="+date+"&time="+params[:time]
   end
-
 
   def departures
     begin
